@@ -6,9 +6,11 @@ authors = ["Dominik Nedvedik <dominik.nedvedik@protonmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8.3"
-pytest = "^5.4.3"
 
 [tool.poetry.dev-dependencies]
+pytest = "^5.4.3"
+pytest-cov = "^2.10.0"
+pylint = "^2.5.3"
 
 [build-system]
 requires = ["poetry>=0.12"]
