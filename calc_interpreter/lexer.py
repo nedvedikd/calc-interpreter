@@ -88,7 +88,10 @@ class Lexer:
 
     def number(self):
         number = ''
-        while self.current_char and Grammar.is_number(self.current_char):
+        while self.current_char and Grammar.is_number(self.current_char) or self.current_char == '_':
+            if self.current_char == '_':
+                self.forward()
+                continue
             if Grammar.is_exponent(self.current_char):
                 if number in ['', '.'] or self.last_char() or self.current_char in number:
                     self.error()
