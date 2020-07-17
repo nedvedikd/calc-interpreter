@@ -1,4 +1,5 @@
 import re
+import math
 import operator as op_func
 from calc_interpreter.lexer import TokenType
 from calc_interpreter.parser import Parser
@@ -21,6 +22,13 @@ def get_node_method_name(node):
     return method
 
 
+def strip_decimal(number):
+    frac, whole = math.modf(number)
+    if frac == 0:
+        return int(whole)
+    return number
+
+
 class NodeTraversal:
     def visit(self, node):
         method = get_node_method_name(node)
@@ -38,13 +46,13 @@ class Evaluator(NodeTraversal):
         self.parser = parser
 
     def traverse_number(self, node):
-        return node.value
+        return strip_decimal(node.value)
 
     def traverse_binary_operator(self, node):
         left = self.visit(node.left)
         right = self.visit(node.right)
         operation = operator_func(node.operator.type)
-        return operation(left, right)
+        return strip_decimal(operation(left, right))
 
     def interpret(self):
         tree = self.parser.parse()

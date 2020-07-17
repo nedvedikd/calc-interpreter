@@ -6,7 +6,6 @@ from calc_interpreter.exception import InterpreterError
 
 def main():
     prompt = ':: '
-
     while True:
         try:
             data = input(prompt)

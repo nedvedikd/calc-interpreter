@@ -1,4 +1,6 @@
 from calc_interpreter.lexer import Lexer, TokenType
+from calc_interpreter.parser import Parser
+from calc_interpreter.evaluator import Evaluator
 
 
 def test_number():
@@ -13,3 +15,13 @@ def test_number():
         token = lexer.next_token()
         assert token.type == TokenType.NUMBER
         assert token.value == calculated
+
+
+def test_expressions():
+    expressions = open('tests/expressions.txt').readlines()
+    expressions = [expression.split('=') for expression in expressions]
+    for expression, result in expressions:
+        lexer = Lexer(expression)
+        parser = Parser(lexer)
+        evaluator = Evaluator(parser)
+        assert str(evaluator.interpret()) == result.strip()
