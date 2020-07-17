@@ -30,7 +30,7 @@ def strip_decimal(number):
 
 
 class NodeTraversal:
-    def visit(self, node):
+    def traverse(self, node):
         method = get_node_method_name(node)
         return getattr(self, method, self.default)(node)
 
@@ -49,13 +49,19 @@ class Evaluator(NodeTraversal):
         return strip_decimal(node.value)
 
     def traverse_binary_operator(self, node):
-        left = self.visit(node.left)
-        right = self.visit(node.right)
+        left = self.traverse(node.left)
+        right = self.traverse(node.right)
         operation = operator_func(node.operator.type)
         return strip_decimal(operation(left, right))
+
+    def traverse_unary_operator(self, node):
+        if node.operator.type == TokenType.PLUS:
+            return +self.traverse(node.expr)
+        elif node.operator.type == TokenType.MINUS:
+            return -self.traverse(node.expr)
 
     def interpret(self):
         tree = self.parser.parse()
         if not tree:
             return ''
-        return self.visit(tree)
+        return self.traverse(tree)
