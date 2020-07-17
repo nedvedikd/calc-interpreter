@@ -11,6 +11,7 @@ import re
 from enum import Enum, auto
 from typing import Optional
 from dataclasses import dataclass
+from calc_interpreter.exception import InterpreterError
 
 
 class TokenType(Enum):
@@ -19,6 +20,8 @@ class TokenType(Enum):
     MUL = auto()
     DIV = auto()
     POW = auto()
+    LPAREN = auto()
+    RPAREN = auto()
     STRING = auto()
     NUMBER = auto()
     EOF = auto()
@@ -58,7 +61,9 @@ class Grammar:
             '+': TokenType.PLUS,
             '-': TokenType.MINUS,
             '*': TokenType.MUL,
-            '/': TokenType.DIV
+            '/': TokenType.DIV,
+            '(': TokenType.LPAREN,
+            ')': TokenType.RPAREN
         }
         return operator_dict[operator]
 
@@ -81,10 +86,18 @@ class Lexer:
             self.current_char = None
 
     def error(self):
-        raise Exception('lexer error', self.position+1)
+        raise InterpreterError('lexer error', self.position+1)
 
     def last_char(self):
         return self.position == len(self.text) - 1
+
+    @staticmethod
+    def convert_number(number):
+        try:
+            number = int(number)
+        except ValueError:
+            number = float(number)
+        return number
 
     def number(self):
         number = ''
@@ -97,7 +110,7 @@ class Lexer:
                     self.error()
             if self.current_char in ['+', '-']:
                 if not Grammar.is_exponent(number[-1]):
-                    return number
+                    return Lexer.convert_number(number)
             if self.current_char == '.':
                 if self.current_char in number or 'e' in number or 'E' in number:
                     self.error()
@@ -108,12 +121,7 @@ class Lexer:
         if number[-1] in ['E', 'e', '+', '-'] or number == '.':
             self.error()
 
-        try:
-            number = int(number)
-        except ValueError:
-            number = float(number)
-
-        return number
+        return Lexer.convert_number(number)
 
     def next_token(self):
         while self.current_char:
