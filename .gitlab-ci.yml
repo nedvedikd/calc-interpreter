@@ -1,0 +1,7 @@
+image: python:3.8
+
+test:
+  script:
+    - pip install poetry
+    - poetry install
+    - poetry run py.test --cov-report term-missing --cov=calc_interpreter
