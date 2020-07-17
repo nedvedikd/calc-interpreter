@@ -1,5 +1,6 @@
 """
 Syntax analysis
+
 statement = expr | command
 command = string {string}
 expr = term {('+'|'-') term}
@@ -59,7 +60,7 @@ class Parser:
         self.token = self.lexer.next_token()
 
     def error(self):
-        return InterpreterError("syntax error", self.lexer.position)
+        raise InterpreterError(f'syntax error at {self.lexer.position+1}')
 
     def expect(self, token_type):
         if self.token.type == token_type:
@@ -97,6 +98,7 @@ class Parser:
             node = self.expr()
             self.expect(TokenType.RPAREN)
             return node
+        self.error()
 
     def command(self):
         token = self.token

@@ -43,7 +43,7 @@ class CommandRunner:
         return method(arguments)
 
     def unknown_command(self, command):
-        raise InterpreterError('unknwon command', command)
+        raise InterpreterError(f'unknown command: {command}')
 
     def command_mode(self, arguments):
         modes_available = ['ast', 'rpn', 'default']

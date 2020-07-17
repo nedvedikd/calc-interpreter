@@ -91,7 +91,7 @@ class Lexer:
             self.current_char = None
 
     def error(self):
-        raise InterpreterError('lexer error', self.position+1)
+        raise InterpreterError(f'unexpected character at {self.position+1}')
 
     def last_char(self):
         return self.position == len(self.text) - 1
