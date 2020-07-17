@@ -35,7 +35,7 @@ class Token:
 
 class Grammar:
     NUMBER = r'[0-9.\+-]'
-    OPERATOR = r'[\+\-/\*]'
+    OPERATOR = r'[\+\-/\*()]'
     IGNORE = r'[\s_]'
     EXPONENT = r'[eE]'
 
