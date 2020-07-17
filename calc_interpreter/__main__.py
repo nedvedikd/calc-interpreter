@@ -13,7 +13,7 @@ def main():
             parser = Parser(lexer)
             interpreter = Evaluator(parser)
             result = interpreter.evaluate()
-            if result:
+            if result and interpreter.mode == 'default':
                 print(result)
         except (EOFError, KeyboardInterrupt):
             break

@@ -32,6 +32,9 @@ class Token:
     type: TokenType
     value: [float, int, str]
 
+    def __repr__(self):
+        return f'Token(type={self.type.name!r}, value={self.value!r})'
+
 
 class Grammar:
     NUMBER = r'[0-9.\+-]'
@@ -82,6 +85,7 @@ class Lexer:
         self.text = text
         self.position = 0
         self.current_char = self.text[self.position]
+        self.tokens = []
 
     def forward(self):
         self.position += 1
@@ -144,14 +148,19 @@ class Lexer:
             if Grammar.is_operator(self.current_char):
                 operator_type = Grammar.operator_type(self.current_char)
                 token = Token(operator_type, self.current_char)
+                self.tokens.append(token)
                 self.forward()
                 return token
 
             if Grammar.is_number(self.current_char):
-                return Token(TokenType.NUMBER, self.number())
+                token = Token(TokenType.NUMBER, self.number())
+                self.tokens.append(token)
+                return token
 
             if Grammar.is_string(self.current_char):
-                return Token(TokenType.STRING, self.string())
+                token = Token(TokenType.STRING, self.string())
+                self.tokens.append(token)
+                return token
 
             self.error()
 

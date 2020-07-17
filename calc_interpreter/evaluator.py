@@ -46,14 +46,14 @@ class CommandRunner:
         raise InterpreterError(f'unknown command: {command}')
 
     def command_mode(self, arguments):
-        modes_available = ['ast', 'rpn', 'default']
+        modes_available = ['ast', 'rpn', 'tokens', 'default']
         usage = f'usage: mode (%s)' % ' | '.join(modes_available)
         if not arguments:
             raise InterpreterError(usage)
         mode = arguments[0]
         if mode not in modes_available:
             raise InterpreterError(usage)
-        print('switching to mode', mode)
+        print('switching to mode:', mode)
         self.parent.mode = mode
 
 
@@ -116,4 +116,7 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         tree = self.parser.parse()
         if not tree:
             return ''
+        if self.mode == 'tokens':
+            for token in self.parser.lexer.tokens:
+                print(token)
         return self.traverse(tree)

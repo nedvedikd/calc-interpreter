@@ -1,7 +1,7 @@
 """
 Syntax analysis
 
-statement = expr | command
+statement = command | expr
 command = string {string}
 expr = term {('+'|'-') term}
 term = factor {('*'|'/') factor}
@@ -112,12 +112,11 @@ class Parser:
             return Command(operation, arguments)
 
     def statement(self):
-        node = self.expr()
-        if node:
+        node = self.command()
+        if not node:
+            node = self.expr()
             if self.token.type != TokenType.EOF:
                 self.error()
-        else:
-            node = self.command()
         return node
 
     def parse(self):
