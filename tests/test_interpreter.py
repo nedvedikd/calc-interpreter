@@ -24,4 +24,4 @@ def test_expressions():
         lexer = Lexer(expression)
         parser = Parser(lexer)
         evaluator = Evaluator(parser)
-        assert str(evaluator.interpret()) == result.strip()
+        assert str(evaluator.evaluate()) == result.strip()

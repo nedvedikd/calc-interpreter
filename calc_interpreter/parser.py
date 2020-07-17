@@ -1,12 +1,13 @@
 """
 Syntax analysis
-
+statement = expr | command
+command = string {string}
 expr = term {('+'|'-') term}
 term = factor {('*'|'/') factor}
 factor = ('+'|'-') factor | number | lparen expr rparen
 """
 from __future__ import annotations
-from typing import Optional, Union
+from typing import Optional, Union, List
 from calc_interpreter.lexer import Lexer, Token, TokenType
 from calc_interpreter.exception import InterpreterError
 
@@ -38,6 +39,15 @@ class Number:
     def __init__(self, token):
         self.token = token
         self.value = token.value
+
+
+class Command:
+    operation: str
+    arguments: Union[List[str]]
+
+    def __init__(self, operation, arguments):
+        self. operation = operation
+        self.arguments = arguments
 
 
 class Parser:
@@ -88,8 +98,26 @@ class Parser:
             self.expect(TokenType.RPAREN)
             return node
 
-    def parse(self):
+    def command(self):
+        token = self.token
+        operation = self.token.value
+        arguments = []
+        if token.type == TokenType.STRING:
+            self.expect(token.type)
+            while self.token.type != TokenType.EOF:
+                arguments.append(self.token.value)
+                self.expect(TokenType.STRING)
+            return Command(operation, arguments)
+
+    def statement(self):
         node = self.expr()
-        if self.token.type != TokenType.EOF:
-            self.error()
+        if node:
+            if self.token.type != TokenType.EOF:
+                self.error()
+        else:
+            node = self.command()
+        return node
+
+    def parse(self):
+        node = self.statement()
         return node

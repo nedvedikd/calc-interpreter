@@ -36,12 +36,17 @@ class Token:
 class Grammar:
     NUMBER = r'[0-9.\+-]'
     OPERATOR = r'[\+\-/\*()]'
+    STRING = r'[A-Za-z]'
     IGNORE = r'[\s_]'
     EXPONENT = r'[eE]'
 
     @staticmethod
     def is_number(char):
         return re.match(Grammar.NUMBER, char) or Grammar.is_exponent(char)
+
+    @staticmethod
+    def is_string(char):
+        return re.match(Grammar.STRING, char)
 
     @staticmethod
     def is_exponent(char):
@@ -123,6 +128,13 @@ class Lexer:
 
         return Lexer.convert_number(number)
 
+    def string(self):
+        string = ''
+        while self.current_char and Grammar.is_string(self.current_char):
+            string += self.current_char
+            self.forward()
+        return string
+
     def next_token(self):
         while self.current_char:
             if Grammar.is_ignored(self.current_char):
@@ -137,6 +149,10 @@ class Lexer:
 
             if Grammar.is_number(self.current_char):
                 return Token(TokenType.NUMBER, self.number())
+
+            if Grammar.is_string(self.current_char):
+                return Token(TokenType.STRING, self.string())
+
             self.error()
 
         return Token(TokenType.EOF, 'EOF')

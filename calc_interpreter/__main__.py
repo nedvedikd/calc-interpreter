@@ -11,9 +11,10 @@ def main():
             data = input(prompt)
             lexer = Lexer(data)
             parser = Parser(lexer)
-            evaluator = Evaluator(parser)
-            result = evaluator.interpret()
-            print(result)
+            interpreter = Evaluator(parser)
+            result = interpreter.evaluate()
+            if result:
+                print(result)
         except (EOFError, KeyboardInterrupt):
             break
         except InterpreterError as err:
