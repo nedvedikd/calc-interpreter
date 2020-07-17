@@ -4,6 +4,10 @@ version = "0.1.0"
 description = ""
 authors = ["Dominik Nedvedik <dominik.nedvedik@protonmail.com>"]
 
+[tool.dephell.main]
+from = {format = "poetry", path = "pyproject.toml"}
+to = {format = "setuppy", path = "setup.py"}
+
 [tool.poetry.dependencies]
 python = "^3.8.3"
 
@@ -11,6 +15,7 @@ python = "^3.8.3"
 pytest = "^5.4.3"
 pytest-cov = "^2.10.0"
 pylint = "^2.5.3"
+dephell = "^0.8.3"
 
 [build-system]
 requires = ["poetry>=0.12"]
