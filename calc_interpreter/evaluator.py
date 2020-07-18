@@ -111,8 +111,6 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         return self.runner.execute(node.operation, node.arguments)
 
     def evaluate(self):
-        if not self.parser:
-            raise ValueError('parser is not set! use set_parser method.')
         tree = self.parser.parse()
         if not tree:
             return ''
