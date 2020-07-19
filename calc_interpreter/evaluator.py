@@ -93,8 +93,13 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         """
         left = self.traverse(node.left)
         right = self.traverse(node.right)
-        operation = operator_func(node.operator.type)
-        return strip_decimal(operation(left, right))
+        try:
+            operation = operator_func(node.operator.type)
+            return strip_decimal(operation(left, right))
+        except ZeroDivisionError:
+            raise InterpreterError('zero division')
+        except TypeError:
+            raise InterpreterError('complex numbers not supported')
 
     def traverse_unary_operator(self, node):
         """
