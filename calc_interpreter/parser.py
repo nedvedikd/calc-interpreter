@@ -1,11 +1,13 @@
 """
-Syntax analysis
+Syntax Analysis
 
 statement = command | expr
 command = string {string}
 expr = term {('+'|'-') term}
-term = factor {('*'|'/') factor}
-factor = ('+'|'-') factor | number | lparen expr rparen
+term = unary {('*'|'/') unary}
+unary = ('+'|'-') unary | power
+power = factor ['**' power]
+factor = number | lparen expr rparen
 """
 from __future__ import annotations
 from typing import Optional, Union, List
@@ -77,20 +79,33 @@ class Parser:
         return node
 
     def term(self):
-        node = self.factor()
+        node = self.unary()
         while self.token.type in [TokenType.MUL, TokenType.DIV]:
             token = self.token
             self.expect(self.token.type)
-            node = BinaryOperator(node, token, self.factor())
+            node = BinaryOperator(node, token, self.unary())
+        return node
+
+    def unary(self):
+        token = self.token
+        if token.type in [TokenType.PLUS, TokenType.MINUS]:
+            self.expect(token.type)
+            node = UnaryOperator(token, self.unary())
+        else:
+            node = self.power()
+        return node
+
+    def power(self):
+        node = self.factor()
+        token = self.token
+        if token.type == TokenType.POW:
+            self.expect(token.type)
+            node = BinaryOperator(node, token, self.power())
         return node
 
     def factor(self):
         token = self.token
-        if token.type in [TokenType.PLUS, TokenType.MINUS]:
-            self.expect(token.type)
-            node = UnaryOperator(token, self.factor())
-            return node
-        elif token.type == TokenType.NUMBER:
+        if token.type == TokenType.NUMBER:
             self.expect(token.type)
             return Number(token)
         elif token.type == TokenType.LPAREN:

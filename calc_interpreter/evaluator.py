@@ -13,6 +13,7 @@ def operator_func(operator):
         TokenType.MINUS: op_func.sub,
         TokenType.MUL: op_func.mul,
         TokenType.DIV: op_func.truediv,
+        TokenType.POW: op_func.pow
     }
     return operations[operator]
 

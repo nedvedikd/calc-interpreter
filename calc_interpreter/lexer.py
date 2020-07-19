@@ -1,12 +1,11 @@
 """
-Lexical Analyzer
+Lexical Analysis
 
 number = (sep integer | integer sep | integer) {integer} [('e'|'E') ['+'|'-'] {integer}]
 integer = digit {digit}*
 sep = '.'
 digit = 0-9
 """
-
 import re
 from enum import Enum, auto
 from typing import Optional
@@ -70,10 +69,12 @@ class Grammar:
             '-': TokenType.MINUS,
             '*': TokenType.MUL,
             '/': TokenType.DIV,
+            '**': TokenType.POW,
             '(': TokenType.LPAREN,
             ')': TokenType.RPAREN
         }
-        return operator_dict[operator]
+        if operator in operator_dict.keys():
+            return operator_dict[operator]
 
 
 class Lexer:
@@ -94,8 +95,10 @@ class Lexer:
         else:
             self.current_char = None
 
-    def error(self):
-        raise InterpreterError(f'unexpected character at {self.position+1}')
+    def error(self, message=None):
+        if not message:
+            message = f'unexpected character at {self.position+1}'
+        raise InterpreterError(message)
 
     def last_char(self):
         return self.position == len(self.text) - 1
@@ -139,6 +142,13 @@ class Lexer:
             self.forward()
         return string
 
+    def operator(self):
+        operator = ''
+        while self.current_char and Grammar.operator_type(operator + self.current_char):
+            operator += self.current_char
+            self.forward()
+        return operator
+
     def next_token(self):
         while self.current_char:
             if Grammar.is_ignored(self.current_char):
@@ -146,10 +156,9 @@ class Lexer:
                 continue
 
             if Grammar.is_operator(self.current_char):
-                operator_type = Grammar.operator_type(self.current_char)
-                token = Token(operator_type, self.current_char)
+                operator = self.operator()
+                token = Token(Grammar.operator_type(operator), operator)
                 self.tokens.append(token)
-                self.forward()
                 return token
 
             if Grammar.is_number(self.current_char):
