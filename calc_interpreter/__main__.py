@@ -11,9 +11,14 @@ def main():
             data = input(prompt)
             lexer = Lexer(data)
             parser = Parser(lexer)
-            interpreter = Evaluator(parser)
-            result = interpreter.evaluate()
-            if result and interpreter.mode == 'default':
+            evaluator = Evaluator(parser)
+            result = evaluator.evaluate()
+            if evaluator.mode == 'tokens':
+                for token in lexer.tokens:
+                    if token.value == 'mode':
+                        break
+                    print(token)
+            elif result:
                 print(result)
         except (EOFError, KeyboardInterrupt):
             break
@@ -21,4 +26,5 @@ def main():
             print(err)
 
 
-main()
+if __name__ == '__main__':
+    main()

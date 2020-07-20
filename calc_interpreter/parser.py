@@ -45,11 +45,11 @@ class Number:
 
 
 class Command:
-    operation: str
-    arguments: Union[List[str]]
+    operation: Token
+    arguments: List[Token]
 
     def __init__(self, operation, arguments):
-        self. operation = operation
+        self.operation = operation
         self.arguments = arguments
 
 
@@ -117,12 +117,12 @@ class Parser:
 
     def command(self):
         token = self.token
-        operation = self.token.value
+        operation = self.token
         arguments = []
         if token.type == TokenType.STRING:
             self.expect(token.type)
             while self.token.type != TokenType.EOF:
-                arguments.append(self.token.value)
+                arguments.append(self.token)
                 self.expect(TokenType.STRING)
             return Command(operation, arguments)
 

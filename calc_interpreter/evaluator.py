@@ -1,7 +1,8 @@
 import re
 import math
 import operator as op_func
-from calc_interpreter.lexer import TokenType
+from typing import List, Optional
+from calc_interpreter.lexer import Token, TokenType
 from calc_interpreter.singleton import Singleton
 from calc_interpreter.exception import InterpreterError
 from calc_interpreter.parser import Parser, Command, UnaryOperator, BinaryOperator, Number
@@ -37,21 +38,31 @@ class CommandRunner:
         self.parent = parent
 
     def execute(self, command, arguments=None):
-        callback = f'command_{command}'
+        """
+        :type command: Token
+        :type arguments: Optional[List[Token]]
+        """
+        callback = f'command_{command.value}'
         if callback not in dir(self):
             self.unknown_command(command)
         method = getattr(self, callback)
         return method(arguments)
 
     def unknown_command(self, command):
-        raise InterpreterError(f'unknown command: {command}')
+        """
+        :type command: Token
+        """
+        raise InterpreterError(f'unknown command: {command.value}')
 
     def command_mode(self, arguments):
+        """
+        :type arguments: List[Token]
+        """
         modes_available = ['ast', 'rpn', 'tokens', 'default']
         usage = f'usage: mode (%s)' % ' | '.join(modes_available)
         if not arguments:
             raise InterpreterError(usage)
-        mode = arguments[0]
+        mode = arguments[0].value
         if mode not in modes_available:
             raise InterpreterError(usage)
         print('switching to mode:', mode)
@@ -93,13 +104,16 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         """
         left = self.traverse(node.left)
         right = self.traverse(node.right)
-        try:
-            operation = operator_func(node.operator.type)
-            return strip_decimal(operation(left, right))
-        except ZeroDivisionError:
-            raise InterpreterError('zero division')
-        except TypeError:
-            raise InterpreterError('complex numbers not supported')
+        if self.mode == 'default':
+            try:
+                operation = operator_func(node.operator.type)
+                return strip_decimal(operation(left, right))
+            except ZeroDivisionError:
+                raise InterpreterError('zero division')
+            except TypeError:
+                raise InterpreterError('complex numbers are not supported')
+        elif self.mode == 'rpn':
+            return f'{left} {right} {node.operator.value}'
 
     def traverse_unary_operator(self, node):
         """
@@ -120,7 +134,4 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         tree = self.parser.parse()
         if not tree:
             return ''
-        if self.mode == 'tokens':
-            for token in self.parser.lexer.tokens:
-                print(token)
         return self.traverse(tree)
