@@ -156,23 +156,18 @@ class Lexer:
             if Grammar.is_ignored(self.current_char):
                 self.forward()
                 continue
-
             if Grammar.is_operator(self.current_char):
                 operator = self.operator()
                 token = Token(Grammar.operator_type(operator), operator)
                 self.tokens.append(token)
                 return token
-
             if Grammar.is_number(self.current_char):
                 token = Token(TokenType.NUMBER, self.number())
                 self.tokens.append(token)
                 return token
-
             if Grammar.is_string(self.current_char):
                 token = Token(TokenType.STRING, self.string())
                 self.tokens.append(token)
                 return token
-
             self.error()
-
         return Token(TokenType.EOF, 'EOF')
