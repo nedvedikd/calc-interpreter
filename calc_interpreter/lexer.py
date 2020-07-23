@@ -1,7 +1,7 @@
 """
 Lexical Analysis
 
-string = letter {letter}
+identifier = letter {digit | letter}
 letter = A-Za-z
 number = (sep integer | integer sep | integer) {integer} [('e'|'E') ['+'|'-'] {integer}]
 integer = digit {digit}
@@ -23,7 +23,7 @@ class TokenType(Enum):
     POW = auto()
     LPAREN = auto()
     RPAREN = auto()
-    STRING = auto()
+    IDENTIFIER = auto()
     NUMBER = auto()
     EOF = auto()
 
@@ -166,7 +166,7 @@ class Lexer:
                 self.tokens.append(token)
                 return token
             if Grammar.is_string(self.current_char):
-                token = Token(TokenType.STRING, self.string())
+                token = Token(TokenType.IDENTIFIER, self.string())
                 self.tokens.append(token)
                 return token
             self.error()

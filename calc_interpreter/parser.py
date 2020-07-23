@@ -1,13 +1,15 @@
 """
 Syntax Analysis
 
-statement = command | expr
-command = string {string}
+statement = command | expr | variable_assignment
+variable_assignment = variable '=' expr
+command = identifier {identifier}
 expr = term {('+'|'-') term}
 term = unary {('*'|'/') unary}
 unary = ('+'|'-') unary | power
 power = factor ['**' power]
-factor = number | lparen expr rparen
+factor = number | lparen expr rparen | variable
+variable = identifier
 """
 from __future__ import annotations
 from typing import Optional, Union, List
@@ -119,11 +121,11 @@ class Parser:
         token = self.token
         operation = self.token
         arguments = []
-        if token.type == TokenType.STRING:
+        if token.type == TokenType.IDENTIFIER:
             self.expect(token.type)
             while self.token.type != TokenType.EOF:
                 arguments.append(self.token)
-                self.expect(TokenType.STRING)
+                self.expect(TokenType.IDENTIFIER)
             return Command(operation, arguments)
 
     def statement(self):

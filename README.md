@@ -39,19 +39,21 @@ evaluate the AST:
 Interpreter is based on this set of rules (EBNF):
 
 ```
-statement   =   command | expr
-command     =   string {string}
-expr        =   term {('+'|'-') term}
-term        =   unary {('*'|'/') unary}
-unary       =   ('+'|'-') unary | power
-power       =   factor ['**' power]
-factor      =   number | lparen expr rparen
-string      =   letter {letter}
-letter      =   A-Za-z
-number      =   (sep integer | integer sep | integer) {integer} [('e'|'E') ['+'|'-'] {integer}]
-integer     =   digit {digit}
-sep         =   '.'
-digit       =   0-9
+statement           =   command | expr | variable_assignment
+command             =   string {string}
+variable_assignment =   variable '=' expr
+expr                =   term {('+'|'-') term}
+term                =   unary {('*'|'/') unary}
+unary               =   ('+'|'-') unary | power
+power               =   factor ['**' power]
+factor              =   number | lparen expr rparen | variable
+variable            =   identifier
+identifier          =   letter {digit | letter}
+letter              =   A-Za-z
+number              =   (sep integer | integer sep | integer) {integer} [('e'|'E') ['+'|'-'] {integer}]
+integer             =   digit {digit}
+sep                 =   '.'
+digit               =   0-9
 ```
 
 So interpreter supports all of basic mathematical operations that is: 
