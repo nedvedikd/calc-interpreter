@@ -2,10 +2,9 @@ import re
 import math
 import operator as op_func
 from typing import List, Optional
-from calc_interpreter.lexer import Token, TokenType
+from calc_interpreter.lexer import Token
 from calc_interpreter.singleton import Singleton
-from calc_interpreter.exception import InterpreterError
-from calc_interpreter.parser import Parser, Command, UnaryOperator, BinaryOperator, Number
+from calc_interpreter.parser import *
 
 
 def operator_func(operator):
@@ -80,17 +79,16 @@ class NodeTraversal:
 
 
 class Evaluator(NodeTraversal, metaclass=Singleton):
-    parser: Parser
+    tree: NodeAST
     mode: str
     runner: CommandRunner
+    memory: dict
 
-    def __init__(self, parser):
-        self.parser = parser
+    def __init__(self, tree):
+        self.tree = tree
         self.mode = 'default'
         self.runner = CommandRunner(self)
-
-    def set_parser(self, parser):
-        self.parser = parser
+        self.memory = {}
 
     def traverse_number(self, node):
         """
@@ -130,8 +128,23 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         """
         return self.runner.execute(node.operation, node.arguments)
 
+    def traverse_variable_assignment(self, node):
+        """
+        :type node: VariableAssignment
+        """
+        self.memory[node.left.value] = self.traverse(node.right)
+
+    def traverse_variable(self, node):
+        """
+        :type node: Variable
+        """
+        try:
+            return self.memory[node.value]
+        except KeyError:
+            raise InterpreterError(f'undefined variable: {node.value}')
+
     def evaluate(self):
-        tree = self.parser.parse()
+        tree = self.tree
         if not tree:
             return ''
         return self.traverse(tree)

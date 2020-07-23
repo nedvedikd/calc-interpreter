@@ -23,5 +23,6 @@ def test_expressions():
     for expression, result in expressions:
         lexer = Lexer(expression)
         parser = Parser(lexer)
-        evaluator = Evaluator(parser)
+        tree = parser.parse()
+        evaluator = Evaluator(tree)
         assert str(evaluator.evaluate()) == result.strip()

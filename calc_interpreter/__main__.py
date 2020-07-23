@@ -11,7 +11,8 @@ def main():
             data = input(prompt)
             lexer = Lexer(data)
             parser = Parser(lexer)
-            evaluator = Evaluator(parser)
+            tree = parser.parse()
+            evaluator = Evaluator(tree)
             result = evaluator.evaluate()
             if evaluator.mode == 'tokens':
                 for token in lexer.tokens:

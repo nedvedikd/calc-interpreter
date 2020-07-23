@@ -23,7 +23,9 @@ class TokenType(Enum):
     POW = auto()
     LPAREN = auto()
     RPAREN = auto()
+    ASSIGN = auto()
     IDENTIFIER = auto()
+    MODE = auto()
     NUMBER = auto()
     EOF = auto()
 
@@ -43,13 +45,16 @@ class Grammar:
     STRING = r'[A-Za-z]'
     IGNORE = r'[\s_]'
     EXPONENT = r'[eE]'
+    KEYWORDS = {
+        'mode': Token(TokenType.MODE, 'mode')
+    }
 
     @staticmethod
     def is_number(char):
         return re.match(Grammar.NUMBER, char) or Grammar.is_exponent(char)
 
     @staticmethod
-    def is_string(char):
+    def is_identifier(char):
         return re.match(Grammar.STRING, char)
 
     @staticmethod
@@ -114,42 +119,43 @@ class Lexer:
         return number
 
     def number(self):
-        number = ''
+        _num = ''
         while self.current_char and Grammar.is_number(self.current_char) or self.current_char == '_':
             if self.current_char == '_':
                 self.forward()
                 continue
             if Grammar.is_exponent(self.current_char):
-                if number in ['', '.'] or self.last_char() or self.current_char in number:
+                if _num in ['', '.'] or self.last_char() or self.current_char in _num:
                     self.error()
             if self.current_char in ['+', '-']:
-                if not Grammar.is_exponent(number[-1]):
-                    return Lexer.convert_number(number)
+                if not Grammar.is_exponent(_num[-1]):
+                    return Lexer.convert_number(_num)
             if self.current_char == '.':
-                if self.current_char in number or 'e' in number or 'E' in number:
+                if self.current_char in _num or 'e' in _num or 'E' in _num:
                     self.error()
 
-            number += self.current_char
+            _num += self.current_char
             self.forward()
 
-        if number[-1] in ['E', 'e', '+', '-'] or number == '.':
+        if _num[-1] in ['E', 'e', '+', '-'] or _num == '.':
             self.error()
 
-        return Lexer.convert_number(number)
+        return Lexer.convert_number(_num)
 
-    def string(self):
-        string = ''
-        while self.current_char and Grammar.is_string(self.current_char):
-            string += self.current_char
+    def identifier(self):
+        _id = ''
+        while self.current_char and (Grammar.is_identifier(self.current_char) or self.current_char.isdigit()):
+            _id += self.current_char
             self.forward()
-        return string
+        token = Grammar.KEYWORDS.get(_id, Token(TokenType.IDENTIFIER, _id))
+        return token
 
     def operator(self):
-        operator = ''
-        while self.current_char and Grammar.operator_type(operator + self.current_char):
-            operator += self.current_char
+        _op = ''
+        while self.current_char and Grammar.operator_type(_op + self.current_char):
+            _op += self.current_char
             self.forward()
-        return operator
+        return _op
 
     def next_token(self):
         while self.current_char:
@@ -165,8 +171,13 @@ class Lexer:
                 token = Token(TokenType.NUMBER, self.number())
                 self.tokens.append(token)
                 return token
-            if Grammar.is_string(self.current_char):
-                token = Token(TokenType.IDENTIFIER, self.string())
+            if Grammar.is_identifier(self.current_char):
+                token = self.identifier()
+                self.tokens.append(token)
+                return token
+            if self.current_char == '=':
+                token = Token(TokenType.ASSIGN, self.current_char)
+                self.forward()
                 self.tokens.append(token)
                 return token
             self.error()
