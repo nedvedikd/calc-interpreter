@@ -59,8 +59,22 @@ digit               =   0-9
 So interpreter supports all of basic mathematical operations that is: 
 addition, subtraction, multiplication, division + exponents and parentheses
 
-The number can be written in many different ways. 
-`1`, `2.2`, `2.5e4`, `.5e-2`, `1_000_000e-3` are all valid.
+### Features
+* Wide range of number formats:
+    * `1`, `2.2`, `2.5e4`, `.5e-2`, `1_000_000e-3` etc.
+* Variables
+* Different modes via `mode (rpn | tokens | default)`
+    * `rpn` = prints input in Reverse-Polish Notation
+    * `tokens` = prints tokens
+    * `default` = switch back to normal evaluation
+    
+### Example
+```
+:: a = 90 - 38 * 2
+:: b = a - 2
+:: 12 * b
+144
+```
 
 ## Installation and Usage
 
