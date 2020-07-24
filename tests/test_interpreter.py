@@ -1,3 +1,5 @@
+import pytest
+from calc_interpreter.exception import InterpreterError
 from calc_interpreter.lexer import Lexer, TokenType
 from calc_interpreter.parser import Parser
 from calc_interpreter.evaluator import Evaluator
@@ -26,3 +28,23 @@ def test_expressions():
         tree = parser.parse()
         evaluator = Evaluator(tree)
         assert str(evaluator.evaluate()) == result.strip()
+
+
+def test_variables():
+    expressions = ['a = 52e-2', 'b = a * 10', 'b']
+    results = [None, None, 5.2]
+    for expression, result in zip(expressions, results):
+        lexer = Lexer(expression)
+        parser = Parser(lexer)
+        tree = parser.parse()
+        evaluator = Evaluator(tree)
+        assert evaluator.evaluate() == result
+
+
+def test_invalid_variables():
+    lexer = Lexer('1a = 5')
+    parser = Parser(lexer)
+    with pytest.raises(InterpreterError):
+        tree = parser.parse()
+        evaluator = Evaluator(tree)
+        evaluator.evaluate()
