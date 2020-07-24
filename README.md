@@ -68,7 +68,7 @@ Only requirement is Python 3.8.3 or higher.
 
 ```bash
 git clone git@github.com:nedvedikd/calc-interpreter.git
-pip install ./calc-interpreter --user
+python -m pip install ./calc-interpreter --user
 ```
 
 ```bash
