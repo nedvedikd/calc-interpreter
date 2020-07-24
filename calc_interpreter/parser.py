@@ -5,8 +5,8 @@ statement = command | expr | variable_assignment
 variable_assignment = variable '=' expr
 command = identifier {identifier}
 expr = term {('+'|'-') term}
-term = unary {('*'|'/') unary}
-unary = ('+'|'-') unary | power
+term = unary {('*'|'/'|'//'|'%') unary}
+unary = ('+'|'-'|'~') unary | power
 power = factor ['**' power]
 factor = number | lparen expr rparen | variable
 variable = identifier
@@ -115,7 +115,7 @@ class Parser:
 
     def term(self):
         node = self.unary()
-        while self.token.type in [TokenType.MUL, TokenType.DIV]:
+        while self.token.type in [TokenType.MUL, TokenType.DIV, TokenType.FLOOR_DIV, TokenType.MODULUS]:
             token = self.token
             self.expect(self.token.type)
             node = BinaryOperator(node, token, self.unary())
@@ -123,7 +123,7 @@ class Parser:
 
     def unary(self):
         token = self.token
-        if token.type in [TokenType.PLUS, TokenType.MINUS]:
+        if token.type in [TokenType.PLUS, TokenType.MINUS, TokenType.BITWISE_NOT]:
             self.expect(token.type)
             node = UnaryOperator(token, self.unary())
         else:

@@ -13,6 +13,8 @@ def operator_func(operator):
         TokenType.MINUS: op_func.sub,
         TokenType.MUL: op_func.mul,
         TokenType.DIV: op_func.truediv,
+        TokenType.FLOOR_DIV: op_func.floordiv,
+        TokenType.MODULUS: op_func.mod,
         TokenType.POW: op_func.pow
     }
     return operations[operator]
@@ -121,6 +123,8 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
             return +self.traverse(node.expr)
         elif node.operator.type == TokenType.MINUS:
             return -self.traverse(node.expr)
+        elif node.operator.type == TokenType.BITWISE_NOT:
+            return ~self.traverse(node.expr)
 
     def traverse_command(self, node):
         """

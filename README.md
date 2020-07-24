@@ -43,8 +43,8 @@ statement           =   command | expr | variable_assignment
 command             =   string {string}
 variable_assignment =   variable '=' expr
 expr                =   term {('+'|'-') term}
-term                =   unary {('*'|'/') unary}
-unary               =   ('+'|'-') unary | power
+term                =   unary {('*'|'/','//','%') unary}
+unary               =   ('+'|'-'|'~') unary | power
 power               =   factor ['**' power]
 factor              =   number | lparen expr rparen | variable
 variable            =   identifier
@@ -57,17 +57,21 @@ sep                 =   '.'
 digit               =   0-9
 ```
 
-So interpreter supports all of basic mathematical operations that is: 
-addition, subtraction, multiplication, division + exponents and parentheses
-
 ### Features
 * Wide range of number formats:
     * `1`, `2.2`, `2.5e4`, `.5e-2`, `1_000_000e-3` etc.
-* Variables
+* Variables `a = 145`
 * Different modes via `mode (rpn | tokens | default)`
     * `rpn` = prints input in Reverse-Polish Notation
     * `tokens` = prints tokens
     * `default` = switch back to normal evaluation
+* Operations:
+    * Parentheses `()`
+    * Exponent `**`
+    * Unary plus `+a`, Unary minus `-a`, Bitwise NOT `~a`
+    * Multiplication `*`, Division `/`, Floor Division `//`, Modulus `%`
+    * Addition `+`, Subtraction `-`
+    
     
 ### Example
 ```

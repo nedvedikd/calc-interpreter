@@ -21,7 +21,10 @@ class TokenType(Enum):
     MINUS = auto()
     MUL = auto()
     DIV = auto()
+    FLOOR_DIV = auto()
+    MODULUS = auto()
     POW = auto()
+    BITWISE_NOT = auto()
     LPAREN = auto()
     RPAREN = auto()
     ASSIGN = auto()
@@ -42,7 +45,7 @@ class Token:
 
 class Grammar:
     NUMBER = r'[0-9.\+-]'
-    OPERATOR = r'[\+\-/\*()]'
+    OPERATOR = r'[\+\-/\*()~%]'
     STRING = r'[A-Za-z]'
     IGNORE = r'[\s_]'
     EXPONENT = r'[eE]'
@@ -77,7 +80,10 @@ class Grammar:
             '-': TokenType.MINUS,
             '*': TokenType.MUL,
             '/': TokenType.DIV,
+            '//': TokenType.FLOOR_DIV,
+            '%': TokenType.MODULUS,
             '**': TokenType.POW,
+            '~': TokenType.BITWISE_NOT,
             '(': TokenType.LPAREN,
             ')': TokenType.RPAREN
         }
