@@ -23,6 +23,7 @@ def test_expressions():
     expressions = open('tests/expressions.txt').readlines()
     expressions = [expression.split('=') for expression in expressions]
     for expression, result in expressions:
+        print(expression, result)
         lexer = Lexer(expression)
         parser = Parser(lexer)
         tree = parser.parse()

@@ -1,14 +1,18 @@
 """
 Syntax Analysis
 
-statement = command | expr | variable_assignment
-variable_assignment = variable '=' expr
+statement = command | bitwise_or | variable_assignment
+variable_assignment = variable '=' bitwise_or
 command = identifier {identifier}
+bitwise_or = bitwise_xor {'|' bitwise_xor}
+bitwise_xor = bitwise_and {'^' bitwise_and}
+bitwise_and = bitwise_shift {'&' bitwise_shift}
+bitwise_shift = expr {('<<'|'>>') expr}
 expr = term {('+'|'-') term}
 term = unary {('*'|'/'|'//'|'%') unary}
 unary = ('+'|'-'|'~') unary | power
 power = factor ['**' power]
-factor = number | lparen expr rparen | variable
+factor = number | lparen bitwise_or rparen | variable
 variable = identifier
 """
 from __future__ import annotations
@@ -102,7 +106,39 @@ class Parser:
 
     def variable_assignment(self, left):
         self.expect(TokenType.ASSIGN)
-        node = VariableAssignment(left, self.expr())
+        node = VariableAssignment(left, self.bitwise_or())
+        return node
+
+    def bitwise_or(self):
+        node = self.bitwise_xor()
+        if self.token.type == TokenType.BITWISE_OR:
+            token = self.token
+            self.expect(token.type)
+            node = BinaryOperator(node, token, self.bitwise_xor())
+        return node
+
+    def bitwise_xor(self):
+        node = self.bitwise_and()
+        if self.token.type == TokenType.BITWISE_XOR:
+            token = self.token
+            self.expect(token.type)
+            node = BinaryOperator(node, token, self.bitwise_and())
+        return node
+
+    def bitwise_and(self):
+        node = self.bitwise_shift()
+        if self.token.type == TokenType.BITWISE_AND:
+            token = self.token
+            self.expect(token.type)
+            node = BinaryOperator(node, token, self.bitwise_shift())
+        return node
+
+    def bitwise_shift(self):
+        node = self.expr()
+        if self.token.type in [TokenType.BITWISE_LEFT_SHIFT, TokenType.BITWISE_RIGHT_SHIFT]:
+            token = self.token
+            self.expect(token.type)
+            node = BinaryOperator(node, token, self.expr())
         return node
 
     def expr(self):
@@ -145,7 +181,7 @@ class Parser:
             return Number(token)
         elif token.type == TokenType.LPAREN:
             self.expect(token.type)
-            node = self.expr()
+            node = self.bitwise_or()
             self.expect(TokenType.RPAREN)
             return node
         else:
@@ -165,7 +201,7 @@ class Parser:
         if self.token.value in Grammar.KEYWORDS.keys():
             node = self.command()
         else:
-            node = self.expr()
+            node = self.bitwise_or()
             if self.token.type == TokenType.ASSIGN and len(self.lexer.tokens) == 2:
                 node = self.variable_assignment(node)
         if self.token.type != TokenType.EOF:

@@ -39,14 +39,18 @@ evaluate the AST:
 Interpreter is based on this set of rules (EBNF):
 
 ```
-statement           =   command | expr | variable_assignment
-command             =   string {string}
-variable_assignment =   variable '=' expr
+statement           =   command | bitwise_or | variable_assignment
+variable_assignment =   variable '=' bitwise_or
+command             =   identifier {identifier}
+bitwise_or          =   bitwise_xor {'|' bitwise_xor}
+bitwise_xor         =   bitwise_and {'^' bitwise_and}
+bitwise_and         =   bitwise_shift {'&' bitwise_shift}
+bitwise_shift       =   expr {('<<'|'>>') expr}
 expr                =   term {('+'|'-') term}
 term                =   unary {('*'|'/','//','%') unary}
 unary               =   ('+'|'-'|'~') unary | power
 power               =   factor ['**' power]
-factor              =   number | lparen expr rparen | variable
+factor              =   number | lparen bitwise_or rparen | variable
 variable            =   identifier
 identifier          =   letter {digit | letter}
 letter              =   A-Za-z
@@ -59,8 +63,8 @@ digit               =   0-9
 
 ### Features
 * Wide range of number formats:
-    * `1`, `2.2`, `2.5e4`, `.5e-2`, `1_000_000e-3` etc.
-* Variables `a = 145`
+    * `1`, `2.2`, `2.5e4`, `.5e-2`, `1_000_000e-3`
+* Variables `a = 145`, `b = (20 * 6)`
 * Different modes via `mode (rpn | tokens | default)`
     * `rpn` = prints input in Reverse-Polish Notation
     * `tokens` = prints tokens
@@ -71,14 +75,30 @@ digit               =   0-9
     * Unary plus `+a`, Unary minus `-a`, Bitwise NOT `~a`
     * Multiplication `*`, Division `/`, Floor Division `//`, Modulus `%`
     * Addition `+`, Subtraction `-`
+    * Bitwise shift `<<`, `>>`
+    * Bitwise AND `&`
+    * Bitwise XOR `^`
+    * Bitwise OR `|`
     
     
-### Example
+### Examples
+```
+:: 3 * (2 + 3)
+15
+```
+
 ```
 :: a = 90 - 38 * 2
 :: b = a - 2
 :: 12 * b
 144
+```
+
+```
+:: x = 2
+:: n = 4
+:: (x << n) | ((-n & 31) >> x)
+39
 ```
 
 ## Installation and Usage

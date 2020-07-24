@@ -9,6 +9,11 @@ from calc_interpreter.parser import *
 
 def operator_func(operator):
     operations = {
+        TokenType.BITWISE_OR: op_func.or_,
+        TokenType.BITWISE_XOR: op_func.xor,
+        TokenType.BITWISE_AND: op_func.and_,
+        TokenType.BITWISE_RIGHT_SHIFT: op_func.rshift,
+        TokenType.BITWISE_LEFT_SHIFT: op_func.lshift,
         TokenType.PLUS: op_func.add,
         TokenType.MINUS: op_func.sub,
         TokenType.MUL: op_func.mul,

@@ -25,6 +25,11 @@ class TokenType(Enum):
     MODULUS = auto()
     POW = auto()
     BITWISE_NOT = auto()
+    BITWISE_AND = auto()
+    BITWISE_XOR = auto()
+    BITWISE_OR = auto()
+    BITWISE_LEFT_SHIFT = auto()
+    BITWISE_RIGHT_SHIFT = auto()
     LPAREN = auto()
     RPAREN = auto()
     ASSIGN = auto()
@@ -45,7 +50,7 @@ class Token:
 
 class Grammar:
     NUMBER = r'[0-9.\+-]'
-    OPERATOR = r'[\+\-/\*()~%]'
+    OPERATOR = r'[\+\-/\*()~%\^&<>\|]'
     STRING = r'[A-Za-z]'
     IGNORE = r'[\s_]'
     EXPONENT = r'[eE]'
@@ -84,6 +89,11 @@ class Grammar:
             '%': TokenType.MODULUS,
             '**': TokenType.POW,
             '~': TokenType.BITWISE_NOT,
+            '&': TokenType.BITWISE_AND,
+            '^': TokenType.BITWISE_XOR,
+            '|': TokenType.BITWISE_OR,
+            '<<': TokenType.BITWISE_LEFT_SHIFT,
+            '>>': TokenType.BITWISE_RIGHT_SHIFT,
             '(': TokenType.LPAREN,
             ')': TokenType.RPAREN
         }
@@ -104,10 +114,15 @@ class Lexer:
 
     def forward(self):
         self.position += 1
-        if self.position <= len(self.text) - 1:
+        if self.position < len(self.text):
             self.current_char = self.text[self.position]
         else:
             self.current_char = None
+
+    def peek(self):
+        pos = self.position + 1
+        if pos < len(self.text):
+            return self.text[pos]
 
     def error(self, message=None):
         if not message:
@@ -159,8 +174,14 @@ class Lexer:
 
     def operator(self):
         _op = ''
-        while self.current_char and Grammar.operator_type(_op + self.current_char):
+        while self.current_char and Grammar.is_operator(self.current_char):
             _op += self.current_char
+            peek = self.peek()
+            if peek and Grammar.is_operator(peek):
+                peek_op = _op + peek
+                if not Grammar.operator_type(peek_op):
+                    self.forward()
+                    return _op
             self.forward()
         return _op
 

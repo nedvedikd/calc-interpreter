@@ -9,6 +9,8 @@ def main():
     while True:
         try:
             data = input(prompt)
+            if not data:
+                continue
             lexer = Lexer(data)
             parser = Parser(lexer)
             tree = parser.parse()
@@ -19,7 +21,7 @@ def main():
                     if token.value == 'mode':
                         break
                     print(token)
-            elif result:
+            elif result or result == 0:
                 print(result)
         except (EOFError, KeyboardInterrupt):
             break
