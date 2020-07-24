@@ -48,3 +48,15 @@ def test_invalid_variables():
         tree = parser.parse()
         evaluator = Evaluator(tree)
         evaluator.evaluate()
+
+
+def test_invalid_numbers():
+    numbers = open('tests/invalid_numbers.txt').readlines()
+    for number in numbers:
+        exceptions = InterpreterError, ValueError
+        with pytest.raises(exceptions):
+            lexer = Lexer(number)
+            parser = Parser(lexer)
+            tree = parser.parse()
+            evaluator = Evaluator(tree)
+            evaluator.evaluate()
