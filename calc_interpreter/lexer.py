@@ -3,7 +3,8 @@ Lexical Analysis
 
 identifier = letter {digit | letter}
 letter = A-Za-z
-number = (sep integer | integer sep | integer) {integer} [('e'|'E') ['+'|'-'] {integer}]
+number = (sep integer | integer sep | integer) {integer} [exponent]
+exponent = ('e'|'E') ['+'|'-'] integer
 integer = digit {digit}
 sep = '.'
 digit = 0-9
