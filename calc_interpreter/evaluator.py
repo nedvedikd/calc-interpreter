@@ -119,12 +119,16 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         """
         :type node: UnaryOperator
         """
-        if node.operator.type == TokenType.PLUS:
-            return +self.traverse(node.expr)
-        elif node.operator.type == TokenType.MINUS:
-            return -self.traverse(node.expr)
-        elif node.operator.type == TokenType.BITWISE_NOT:
-            return ~self.traverse(node.expr)
+        right = self.traverse(node.expr)
+        if self.mode == 'default':
+            if node.operator.type == TokenType.PLUS:
+                return +right
+            elif node.operator.type == TokenType.MINUS:
+                return -right
+            elif node.operator.type == TokenType.BITWISE_NOT:
+                return ~right
+        elif self.mode == 'rpn':
+            return f'{right} {node.operator.value}'
 
     def traverse_command(self, node):
         """
