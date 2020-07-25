@@ -6,7 +6,7 @@ from calc_interpreter.evaluator import Evaluator
 
 
 def test_number():
-    valid_numbers = open('tests/valid_numbers.txt').readlines()
+    valid_numbers = open('tests/data/valid_numbers.txt').readlines()
     valid_numbers = [number.split() for number in valid_numbers]
     for number, calculated in valid_numbers:
         try:
@@ -20,7 +20,7 @@ def test_number():
 
 
 def test_expressions():
-    expressions = open('tests/expressions.txt').readlines()
+    expressions = open('tests/data/expressions.txt').readlines()
     expressions = [expression.split('=') for expression in expressions]
     for expression, result in expressions:
         print(expression, result)
@@ -52,11 +52,22 @@ def test_invalid_variables():
 
 
 def test_invalid_numbers():
-    numbers = open('tests/invalid_numbers.txt').readlines()
+    numbers = open('tests/data/invalid_numbers.txt').readlines()
     for number in numbers:
         exceptions = InterpreterError, ValueError
         with pytest.raises(exceptions):
             lexer = Lexer(number)
+            parser = Parser(lexer)
+            tree = parser.parse()
+            evaluator = Evaluator(tree)
+            evaluator.evaluate()
+
+
+def test_bitwise_error():
+    expressions = open('tests/data/invalid_operations.txt').readlines()
+    for expression in expressions:
+        with pytest.raises(InterpreterError):
+            lexer = Lexer(expression)
             parser = Parser(lexer)
             tree = parser.parse()
             evaluator = Evaluator(tree)

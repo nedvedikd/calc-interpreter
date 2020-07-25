@@ -95,6 +95,15 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         if self.mode == 'default':
             try:
                 operation = operator_func(node.operator.type)
+                bitwise_operations = [
+                    TokenType.BITWISE_LEFT_SHIFT,
+                    TokenType.BITWISE_RIGHT_SHIFT,
+                    TokenType.BITWISE_XOR,
+                    TokenType.BITWISE_OR,
+                    TokenType.BITWISE_AND
+                ]
+                if node.operator.type in bitwise_operations and (type(left) is not int or type(right) is not int):
+                    raise InterpreterError('type error: operands must be integers')
                 return strip_decimal(operation(left, right))
             except ZeroDivisionError:
                 raise InterpreterError('zero division')
@@ -114,6 +123,8 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
             elif node.operator.type == TokenType.MINUS:
                 return -right
             elif node.operator.type == TokenType.BITWISE_NOT:
+                if type(right) is not int:
+                    raise InterpreterError('type error: operand must be integer')
                 return ~right
         elif self.mode == 'rpn':
             return f'{right} {node.operator.value}'
