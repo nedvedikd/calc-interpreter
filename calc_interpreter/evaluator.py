@@ -1,8 +1,8 @@
-import re
 import math
 import operator as op_func
 from typing import List, Optional
 from calc_interpreter.lexer import Token
+from calc_interpreter.traversal import NodeTraversal
 from calc_interpreter.singleton import Singleton
 from calc_interpreter.parser import *
 
@@ -23,13 +23,6 @@ def operator_func(operator):
         TokenType.POW: op_func.pow
     }
     return operations[operator]
-
-
-def get_node_method_name(node):
-    node_name = type(node).__name__
-    name = re.sub(r'(?<!^)(?=[A-Z])', '_', node_name).lower()
-    method = f'traverse_{name}'
-    return method
 
 
 def strip_decimal(number):
@@ -73,16 +66,6 @@ class CommandRunner:
             raise InterpreterError(usage)
         print('switching to mode:', mode)
         self.parent.mode = mode
-
-
-class NodeTraversal:
-    def traverse(self, node):
-        method = get_node_method_name(node)
-        return getattr(self, method, self.default)(node)
-
-    def default(self, node):
-        method = get_node_method_name(node)
-        raise ValueError(f'no method \'{method}\' defined!')
 
 
 class Evaluator(NodeTraversal, metaclass=Singleton):

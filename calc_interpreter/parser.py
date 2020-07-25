@@ -90,8 +90,10 @@ class Parser:
         self.lexer = lexer
         self.token = self.lexer.next_token()
 
-    def error(self):
-        raise InterpreterError(f'syntax error at {self.lexer.position+1}')
+    def error(self, error=None):
+        if not error:
+            error = f'syntax error at {self.lexer.position+1}'
+        raise InterpreterError(error)
 
     def expect(self, token_type):
         if self.token.type == token_type:
@@ -109,37 +111,30 @@ class Parser:
         node = VariableAssignment(left, self.bitwise_or())
         return node
 
-    def bitwise_or(self):
-        node = self.bitwise_xor()
-        if self.token.type == TokenType.BITWISE_OR:
+    def _bitwise_boilerplate(self, operation, tokens):
+        """
+        :type operation: Callable[NodeAST]
+        :param tokens: List[Token]
+        :rtype: NodeAST
+        """
+        node = operation()
+        if self.token.type in tokens:
             token = self.token
             self.expect(token.type)
-            node = BinaryOperator(node, token, self.bitwise_xor())
+            return BinaryOperator(node, token, operation())
         return node
+
+    def bitwise_or(self):
+        return self._bitwise_boilerplate(self.bitwise_xor, [TokenType.BITWISE_OR])
 
     def bitwise_xor(self):
-        node = self.bitwise_and()
-        if self.token.type == TokenType.BITWISE_XOR:
-            token = self.token
-            self.expect(token.type)
-            node = BinaryOperator(node, token, self.bitwise_and())
-        return node
+        return self._bitwise_boilerplate(self.bitwise_and, [TokenType.BITWISE_XOR])
 
     def bitwise_and(self):
-        node = self.bitwise_shift()
-        if self.token.type == TokenType.BITWISE_AND:
-            token = self.token
-            self.expect(token.type)
-            node = BinaryOperator(node, token, self.bitwise_shift())
-        return node
+        return self._bitwise_boilerplate(self.bitwise_shift, [TokenType.BITWISE_AND])
 
     def bitwise_shift(self):
-        node = self.expr()
-        if self.token.type in [TokenType.BITWISE_LEFT_SHIFT, TokenType.BITWISE_RIGHT_SHIFT]:
-            token = self.token
-            self.expect(token.type)
-            node = BinaryOperator(node, token, self.expr())
-        return node
+        return self._bitwise_boilerplate(self.expr, [TokenType.BITWISE_LEFT_SHIFT, TokenType.BITWISE_RIGHT_SHIFT])
 
     def expr(self):
         node = self.term()
@@ -201,9 +196,13 @@ class Parser:
         if self.token.value in Grammar.KEYWORDS.keys():
             node = self.command()
         else:
+            prev = self.token.type
             node = self.bitwise_or()
-            if self.token.type == TokenType.ASSIGN and len(self.lexer.tokens) == 2:
-                node = self.variable_assignment(node)
+            if len(self.lexer.tokens) == 2 and self.token.type == TokenType.ASSIGN:
+                if prev != TokenType.IDENTIFIER:
+                    self.error('syntax error: cannot assign to literal')
+                else:
+                    node = self.variable_assignment(node)
         if self.token.type != TokenType.EOF:
             self.error()
         return node

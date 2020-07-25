@@ -51,8 +51,8 @@ class Token:
 class Grammar:
     NUMBER = r'[0-9.\+-]'
     OPERATOR = r'[\+\-/\*()~%\^&<>\|]'
-    STRING = r'[A-Za-z]'
-    IGNORE = r'[\s_]'
+    STRING = r'[A-Za-z\_]'
+    IGNORE = r'[\s]'
     EXPONENT = r'[eE]'
     KEYWORDS = {
         'mode': Token(TokenType.MODE, 'mode')
@@ -194,12 +194,12 @@ class Lexer:
                 token = Token(Grammar.operator_type(operator), operator)
                 self.tokens.append(token)
                 return token
-            if Grammar.is_number(self.current_char):
-                token = Token(TokenType.NUMBER, self.number())
-                self.tokens.append(token)
-                return token
             if Grammar.is_identifier(self.current_char):
                 token = self.identifier()
+                self.tokens.append(token)
+                return token
+            if Grammar.is_number(self.current_char):
+                token = Token(TokenType.NUMBER, self.number())
                 self.tokens.append(token)
                 return token
             if self.current_char == '=':
