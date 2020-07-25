@@ -97,8 +97,7 @@ class Grammar:
             '(': TokenType.LPAREN,
             ')': TokenType.RPAREN
         }
-        if operator in operator_dict.keys():
-            return operator_dict[operator]
+        return operator_dict.get(operator)
 
 
 class Lexer:
