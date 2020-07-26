@@ -103,7 +103,8 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
                     TokenType.BITWISE_OR,
                     TokenType.BITWISE_AND
                 ]
-                if node.operator.type in bitwise_operations and (type(left) is not int or type(right) is not int):
+                integers = [type(left) is int, type(right) is int]
+                if node.operator.type in bitwise_operations and not all(integers):
                     raise InterpreterError('type error: operands must be integers')
                 result = operation(left, right)
                 if type(result) is complex:
