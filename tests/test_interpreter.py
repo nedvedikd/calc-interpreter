@@ -72,3 +72,17 @@ def test_bitwise_error():
             tree = parser.parse()
             evaluator = Evaluator(tree)
             evaluator.evaluate()
+
+
+def test_ans():
+    operations = ['ans', '45 / 9', 'ans']
+    results = [None, 5, 5]
+    Evaluator.clear()
+    for operation, result in zip(operations, results):
+        lexer = Lexer(operation)
+        parser = Parser(lexer)
+        tree = parser.parse()
+        evaluator = Evaluator(tree)
+        output = evaluator.evaluate()
+        assert output == result
+

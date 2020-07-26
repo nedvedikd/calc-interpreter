@@ -7,3 +7,9 @@ class Singleton(type):
         instance = cls._instances[cls]
         instance.tree = tree  # update tree
         return instance
+
+    def clear(cls):
+        try:
+            del Singleton._instances[cls]
+        except KeyError:
+            return

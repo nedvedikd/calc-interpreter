@@ -2,8 +2,9 @@ import math
 import operator as op_func
 from typing import List, Optional
 from calc_interpreter.lexer import Token
-from calc_interpreter.traversal import NodeTraversal
 from calc_interpreter.singleton import Singleton
+from calc_interpreter.traversal import NodeTraversal
+from calc_interpreter.exception import EmptyVariableError
 from calc_interpreter.parser import *
 
 
@@ -78,7 +79,7 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         self.tree = tree
         self.mode = 'default'
         self.runner = CommandRunner(self)
-        self.memory = {}
+        self.memory = {'ans': None}
 
     def traverse_number(self, node):
         """
@@ -104,11 +105,12 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
                 ]
                 if node.operator.type in bitwise_operations and (type(left) is not int or type(right) is not int):
                     raise InterpreterError('type error: operands must be integers')
-                return strip_decimal(operation(left, right))
+                result = operation(left, right)
+                if type(result) is complex:
+                    raise InterpreterError('complex numbers not supported!')
+                return strip_decimal(result)
             except ZeroDivisionError:
                 raise InterpreterError('zero division')
-            except TypeError:
-                raise InterpreterError('complex numbers are not supported')
         elif self.mode == 'rpn':
             return f'{left} {right} {node.operator.value}'
 
@@ -139,13 +141,19 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         """
         :type node: VariableAssignment
         """
-        self.memory[node.left.value] = self.traverse(node.right)
+        if node.left.value != 'ans':
+            self.memory[node.left.value] = self.traverse(node.right)
+        else:
+            raise InterpreterError('runtime error: trying to rewrite protected variable')
 
     def traverse_variable(self, node):
         """
         :type node: Variable
         """
         try:
+            value = self.memory[node.value]
+            if value is None:
+                raise EmptyVariableError
             return self.memory[node.value]
         except KeyError:
             raise InterpreterError(f'undefined variable: {node.value}')
@@ -154,4 +162,10 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         tree = self.tree
         if not tree:
             return ''
-        return self.traverse(tree)
+        try:
+            result = self.traverse(tree)
+        except EmptyVariableError:
+            return
+        if result is not None:
+            self.memory['ans'] = result
+            return result
