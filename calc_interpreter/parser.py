@@ -17,7 +17,7 @@ variable = identifier
 """
 from __future__ import annotations
 from typing import Optional, Union, List
-from calc_interpreter.lexer import Lexer, Token, TokenType, Grammar
+from calc_interpreter.lexer import Lexer, Token, TokenType
 from calc_interpreter.exception import InterpreterError
 
 
@@ -185,7 +185,7 @@ class Parser:
     def command(self):
         command = self.token
         arguments = []
-        if command.value in Grammar.KEYWORDS.keys():
+        if TokenType.get(command.value):
             self.expect(command.type)
             while self.token.type != TokenType.EOF:
                 arguments.append(self.token)
@@ -193,7 +193,7 @@ class Parser:
             return Command(command, arguments)
 
     def statement(self):
-        if self.token.value in Grammar.KEYWORDS.keys():
+        if self.token.type == TokenType.IDENTIFIER and TokenType.get(self.token.value):
             node = self.command()
         else:
             prev = self.token.type

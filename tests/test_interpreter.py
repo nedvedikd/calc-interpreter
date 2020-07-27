@@ -1,6 +1,6 @@
 import pytest
 from calc_interpreter.exception import InterpreterError
-from calc_interpreter.lexer import Lexer, TokenType
+from calc_interpreter.lexer import Lexer, Token, TokenType
 from calc_interpreter.parser import Parser
 from calc_interpreter.evaluator import Evaluator
 
@@ -75,8 +75,8 @@ def test_bitwise_error():
 
 
 def test_ans():
-    operations = ['ans', '45 / 9', 'ans']
-    results = [None, 5, 5]
+    operations = ['ans', '45 / 9', 'ans ** 2']
+    results = [None, 5, 25]
     Evaluator.clear()
     for operation, result in zip(operations, results):
         lexer = Lexer(operation)
@@ -85,4 +85,3 @@ def test_ans():
         evaluator = Evaluator(tree)
         output = evaluator.evaluate()
         assert output == result
-

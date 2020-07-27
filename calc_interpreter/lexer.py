@@ -10,33 +10,46 @@ sep = '.'
 digit = 0-9
 """
 import re
-from enum import Enum, auto
+from enum import Enum, auto, unique
 from typing import Optional
 from dataclasses import dataclass
 from calc_interpreter.exception import InterpreterError
 
 
+@unique
 class TokenType(Enum):
-    PLUS = auto()
-    MINUS = auto()
-    MUL = auto()
-    DIV = auto()
-    FLOOR_DIV = auto()
-    MODULUS = auto()
-    POW = auto()
-    BITWISE_NOT = auto()
-    BITWISE_AND = auto()
-    BITWISE_XOR = auto()
-    BITWISE_OR = auto()
-    BITWISE_LEFT_SHIFT = auto()
-    BITWISE_RIGHT_SHIFT = auto()
-    LPAREN = auto()
-    RPAREN = auto()
-    ASSIGN = auto()
+    PLUS = '+'
+    MINUS = '-'
+    MUL = '*'
+    DIV = '/'
+    FLOOR_DIV = '//'
+    MODULUS = '%'
+    POW = '**'
+    BITWISE_NOT = '~'
+    BITWISE_AND = '&'
+    BITWISE_XOR = '^'
+    BITWISE_OR = '|'
+    BITWISE_LEFT_SHIFT = '<<'
+    BITWISE_RIGHT_SHIFT = '>>'
+    LPAREN = '('
+    RPAREN = ')'
+    ASSIGN = '='
     IDENTIFIER = auto()
-    MODE = auto()
+    MODE = 'mode'
     NUMBER = auto()
     EOF = auto()
+
+    @staticmethod
+    def get(string, default=None):
+        """
+        Get TokenType based on value
+        """
+        if type(string) is not str:
+            return default
+        try:
+            return TokenType(string)
+        except ValueError:
+            return default
 
 
 @dataclass
@@ -50,13 +63,10 @@ class Token:
 
 class Grammar:
     NUMBER = r'[0-9.\+-]'
-    OPERATOR = r'[\+\-/\*()~%\^&<>\|]'
+    OPERATOR = r'[\+\-/\*()~%\^&<>\|=]'
     STRING = r'[A-Za-z\_]'
     IGNORE = r'[\s]'
     EXPONENT = r'[eE]'
-    KEYWORDS = {
-        'mode': Token(TokenType.MODE, 'mode')
-    }
 
     @staticmethod
     def is_number(char):
@@ -77,27 +87,6 @@ class Grammar:
     @staticmethod
     def is_operator(char):
         return re.match(Grammar.OPERATOR, char)
-
-    @staticmethod
-    def operator_type(operator):
-        operator_dict = {
-            '+': TokenType.PLUS,
-            '-': TokenType.MINUS,
-            '*': TokenType.MUL,
-            '/': TokenType.DIV,
-            '//': TokenType.FLOOR_DIV,
-            '%': TokenType.MODULUS,
-            '**': TokenType.POW,
-            '~': TokenType.BITWISE_NOT,
-            '&': TokenType.BITWISE_AND,
-            '^': TokenType.BITWISE_XOR,
-            '|': TokenType.BITWISE_OR,
-            '<<': TokenType.BITWISE_LEFT_SHIFT,
-            '>>': TokenType.BITWISE_RIGHT_SHIFT,
-            '(': TokenType.LPAREN,
-            ')': TokenType.RPAREN
-        }
-        return operator_dict.get(operator)
 
 
 class Lexer:
@@ -168,8 +157,8 @@ class Lexer:
         while self.current_char and (Grammar.is_identifier(self.current_char) or self.current_char.isdigit()):
             _id += self.current_char
             self.forward()
-        token = Grammar.KEYWORDS.get(_id, Token(TokenType.IDENTIFIER, _id))
-        return token
+        token_type = TokenType.get(_id, TokenType.IDENTIFIER)
+        return Token(token_type, _id)
 
     def operator(self):
         _op = ''
@@ -178,7 +167,7 @@ class Lexer:
             peek = self.peek()
             if peek and Grammar.is_operator(peek):
                 peek_op = _op + peek
-                if not Grammar.operator_type(peek_op):
+                if not TokenType.get(peek_op):
                     self.forward()
                     return _op
             self.forward()
@@ -191,7 +180,7 @@ class Lexer:
                 continue
             if Grammar.is_operator(self.current_char):
                 operator = self.operator()
-                token = Token(Grammar.operator_type(operator), operator)
+                token = Token(TokenType.get(operator), operator)
                 self.tokens.append(token)
                 return token
             if Grammar.is_identifier(self.current_char):
@@ -200,11 +189,6 @@ class Lexer:
                 return token
             if Grammar.is_number(self.current_char):
                 token = Token(TokenType.NUMBER, self.number())
-                self.tokens.append(token)
-                return token
-            if self.current_char == '=':
-                token = Token(TokenType.ASSIGN, self.current_char)
-                self.forward()
                 self.tokens.append(token)
                 return token
             self.error()
