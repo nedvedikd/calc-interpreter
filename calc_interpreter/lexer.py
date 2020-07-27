@@ -67,6 +67,7 @@ class Grammar:
     STRING = r'[A-Za-z\_]'
     IGNORE = r'[\s]'
     EXPONENT = r'[eE]'
+    KEYWORDS = ['mode']
 
     @staticmethod
     def is_number(char):
@@ -87,6 +88,10 @@ class Grammar:
     @staticmethod
     def is_operator(char):
         return re.match(Grammar.OPERATOR, char)
+
+    @staticmethod
+    def is_keyword(string):
+        return string in Grammar.KEYWORDS
 
 
 class Lexer:

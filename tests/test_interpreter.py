@@ -2,7 +2,12 @@ import pytest
 from calc_interpreter.exception import InterpreterError
 from calc_interpreter.lexer import Lexer, Token, TokenType
 from calc_interpreter.parser import Parser
-from calc_interpreter.evaluator import Evaluator
+from calc_interpreter.evaluator import Evaluator, interpret
+
+
+@pytest.fixture(autouse=True)
+def clear_evaluator():
+    Evaluator.clear()
 
 
 def test_number():
@@ -77,7 +82,6 @@ def test_bitwise_error():
 def test_ans():
     operations = ['ans', '45 / 9', 'ans ** 2']
     results = [None, 5, 25]
-    Evaluator.clear()
     for operation, result in zip(operations, results):
         lexer = Lexer(operation)
         parser = Parser(lexer)
@@ -85,3 +89,39 @@ def test_ans():
         evaluator = Evaluator(tree)
         output = evaluator.evaluate()
         assert output == result
+
+
+def test_command_mode_usage(capsys):
+    operations = ['mode', 'mode __idk__']
+    usage = 'usage: mode (ast | rpn | tokens | default)\n'
+    for operation in operations:
+        interpret(operation)
+        output, _ = capsys.readouterr()
+        assert output == usage
+
+
+def test_command_mode_rpn(capsys):
+    operations = ['mode rpn', '(5+3) * 2']
+    results = ['switching to mode: rpn\n', '5 3 + 2 *\n']
+    for operation, result in zip(operations, results):
+        interpret(operation)
+        output, _ = capsys.readouterr()
+        assert output == result
+
+
+def test_mode_tokens(capsys):
+    operations = ['mode tokens', '5+3']
+    tokens = [Token(TokenType.NUMBER, 5), Token(TokenType.PLUS, '+'), Token(TokenType.NUMBER, 3), '']
+    tokens = [str(token) for token in tokens]
+    tokens = '\n'.join(tokens)
+    results = ['switching to mode: tokens\n', tokens]
+    for operation, result in zip(operations, results):
+        interpret(operation)
+        output, _ = capsys.readouterr()
+        assert output == result
+
+
+def test_interpret(capsys):
+    interpret('25 + 5')
+    output, _ = capsys.readouterr()
+    assert output == '30\n'

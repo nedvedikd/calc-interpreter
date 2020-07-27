@@ -170,3 +170,21 @@ class Evaluator(NodeTraversal, metaclass=Singleton):
         if result is not None:
             self.memory['ans'] = result
             return result
+
+
+def interpret(data):
+    try:
+        lexer = Lexer(data)
+        parser = Parser(lexer)
+        tree = parser.parse()
+        evaluator = Evaluator(tree)
+        result = evaluator.evaluate()
+        if evaluator.mode == 'tokens':
+            for token in lexer.tokens:
+                if token.value == 'mode':
+                    break
+                print(token)
+        elif result or result == 0:
+            print(result)
+    except InterpreterError as err:
+        print(err)
